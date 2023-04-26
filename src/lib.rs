@@ -7,7 +7,9 @@ mod tests {
 
     #[test]
     fn build_metainfo() {
-        let info = Info::new_single_file("e04a20f7b16636fc5889201e73ac8625", "debian.iso", 100);
-        Metainfo::new(info, "http://localhost:8080");
+        Metainfo::new(
+            Info::new_single_file("e04a20f7b16636fc5889201e73ac8625", "debian.iso", 100),
+            "http://localhost:8080",
+        );
     }
 }
