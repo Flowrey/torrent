@@ -11,6 +11,7 @@ pub struct Peer {
     port: u32,
 }
 
+/// Tracker response.
 #[allow(dead_code)]
 pub struct Response {
     failure_reason: Option<String>,

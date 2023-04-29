@@ -7,6 +7,7 @@ pub enum Event {
 }
 
 #[allow(dead_code)]
+/// Parameters used to request the tracker.
 pub struct Request {
     info_hash: String,
     peer_id: String,
@@ -23,6 +24,7 @@ pub struct Request {
     trackerid: Option<String>,
 }
 
+/// Builder to create a custom `Request`.
 pub struct RequestBuilder {
     info_hash: String,
     peer_id: String,
@@ -40,10 +42,12 @@ pub struct RequestBuilder {
 }
 
 impl Request {
+    /// Constructs a new `Request`.
     pub fn new(info_hash: String, event: Option<Event>) -> Request {
         Request::builder(info_hash, event).build()
     }
 
+    /// Creates a `RequestBuilder` to configure a custom `Request`.
     pub fn builder(info_hash: String, event: Option<Event>) -> RequestBuilder {
         RequestBuilder {
             info_hash,
@@ -64,6 +68,7 @@ impl Request {
 }
 
 impl RequestBuilder {
+    /// Build a `Request` that use the specified configuration.
     pub fn build(&mut self) -> Request {
         Request {
             info_hash: self.info_hash.clone(),
@@ -82,51 +87,63 @@ impl RequestBuilder {
         }
     }
 
+    /// Unique ID for the client.
     pub fn peer_id(&mut self, peer_id: String) -> &mut RequestBuilder {
         self.peer_id = peer_id;
         self
     }
 
+    /// The port number thaht the client is listening on.
     pub fn port(&mut self, port: u32) -> &mut RequestBuilder {
         self.port = port;
         self
     }
 
+    /// The total amount uploaded.
     pub fn uploaded(&mut self, uploaded: u64) -> &mut RequestBuilder {
         self.uploaded = uploaded;
         self
     }
 
+    /// The total amount downloaded.
     pub fn downloaded(&mut self, downloaded: u64) -> &mut RequestBuilder {
         self.downloaded = downloaded;
         self
     }
 
+    /// The number of bytes this client still has to download.
     pub fn left(&mut self, left: u64) -> &mut RequestBuilder {
         self.left = left;
         self
     }
 
+    /// Indicates that the tracker can omit peer id.
     pub fn no_peer_id(&mut self, no_peer_id: bool) -> &mut RequestBuilder {
         self.no_peer_id = no_peer_id;
         self
     }
 
+    /// The trupe IP address of the client machine.
     pub fn ip(&mut self, ip: String) -> &mut RequestBuilder {
         self.ip = Some(ip);
         self
     }
 
+    /// Number of peers that the client would like to receive from the
+    /// tracker.
     pub fn numwant(&mut self, numwant: u64) -> &mut RequestBuilder {
         self.numwant = Some(numwant);
         self
     }
 
+    /// An additional identification that is not shared with any
+    /// other peers.
     pub fn key(&mut self, key: String) -> &mut RequestBuilder {
         self.key = Some(key);
         self
     }
 
+    /// If a previous annouce contained a tracker id, it shoud be set here.
     pub fn trackerid(&mut self, trackerid: String) -> &mut RequestBuilder {
         self.key = Some(trackerid);
         self
