@@ -7,21 +7,7 @@ mod tests {
 
     use super::metainfo::{Info, Metainfo};
     use super::tracker::Request;
-    use hex_literal::hex;
     use reqwest;
-
-    fn urlencode(in_str: &[u8]) -> String {
-        let mut escaped_info_hash = String::new();
-        for byte in in_str {
-            if byte.is_ascii_alphanumeric() || [b'.', b'-', b'_', b'~'].contains(&byte) {
-                escaped_info_hash.push(*byte as char);
-            } else {
-                let str = format!("%{:x}", byte);
-                escaped_info_hash.push_str(&str);
-            };
-        }
-        escaped_info_hash
-    }
 
     #[test]
     fn build_metainfo() {
@@ -29,12 +15,6 @@ mod tests {
             Info::new_single_file("e04a20f7b16636fc5889201e73ac8625", "debian.iso", 100),
             "http://localhost:8080",
         );
-    }
-
-    #[test]
-    fn hex() {
-        let h = hex!("e04a20f7b16636fc5889201e73ac8625");
-        assert_eq!("%e0J%20%f7%b1f6%fcX%89%20%1es%ac%86%25", urlencode(&h));
     }
 
     #[test]
