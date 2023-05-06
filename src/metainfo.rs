@@ -129,6 +129,11 @@ impl Metainfo {
             encoding: None,
         }
     }
+
+    /// The announce URL of the tracker
+    pub fn annouce(self) -> String {
+        self.annouce
+    }
 }
 
 pub struct MetainfoBuilder {

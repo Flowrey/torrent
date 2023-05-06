@@ -1,5 +1,12 @@
+use serde::{
+    ser::{self, SerializeStruct},
+    Serialize,
+};
+
+use super::urlencode;
+
 #[allow(dead_code)]
-#[derive(Clone)]
+#[derive(Serialize, Clone)]
 pub enum Event {
     Started,
     Completed,
@@ -24,6 +31,29 @@ pub struct Request {
     trackerid: Option<String>,
 }
 
+impl Serialize for Request {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        // 3 is the number of fields in the struct.
+        let mut state = serializer.serialize_struct("Request", 9)?;
+
+        let hash = hex::decode(&self.info_hash)
+            .map_err(|_| ser::Error::custom("failed to decode info_hash to hex"))?;
+        state.serialize_field("info_hash", &urlencode(&hash))?;
+        state.serialize_field("peer_id", &self.peer_id)?;
+        state.serialize_field("port", &self.port)?;
+        state.serialize_field("uploaded", &self.uploaded)?;
+        state.serialize_field("downloaded", &self.downloaded)?;
+        state.serialize_field("left", &self.left)?;
+        state.serialize_field("compact", &self.compact)?;
+        state.serialize_field("no_peer_id", &self.no_peer_id)?;
+        state.serialize_field("numwant", &self.numwant)?;
+        state.end()
+    }
+}
+
 /// Builder to create a custom `Request`.
 pub struct RequestBuilder {
     info_hash: String,
@@ -43,8 +73,8 @@ pub struct RequestBuilder {
 
 impl Request {
     /// Constructs a new `Request`.
-    pub fn new(info_hash: String, event: Option<Event>) -> Request {
-        Request::builder(info_hash, event).build()
+    pub fn new(info_hash: &str, event: Option<Event>) -> Request {
+        Request::builder(info_hash.to_string(), event).build()
     }
 
     /// Creates a `RequestBuilder` to configure a custom `Request`.
