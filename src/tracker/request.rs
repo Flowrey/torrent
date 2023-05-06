@@ -49,7 +49,11 @@ impl Serialize for Request {
         state.serialize_field("left", &self.left)?;
         state.serialize_field("compact", &self.compact)?;
         state.serialize_field("no_peer_id", &self.no_peer_id)?;
+        state.serialize_field("event", &self.event)?;
+        state.serialize_field("ip", &self.ip)?;
         state.serialize_field("numwant", &self.numwant)?;
+        state.serialize_field("key", &self.key)?;
+        state.serialize_field("trackerid", &self.trackerid)?;
         state.end()
     }
 }
