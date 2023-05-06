@@ -10,8 +10,3 @@ bendy = { version = "0.3.3", features = ["serde"] }
 serde = { version = "1.0.162", features = ["derive"] }
 reqwest = "0.11.17"
 hex = "0.4.3"
-
-[dev-dependencies]
-http-body-util = "0.1.0-rc.2"
-hyper = { version = "1.0.0-rc.3", features = ["full"] }
-tokio = { version = "1.28.0", features = ["full"] }
