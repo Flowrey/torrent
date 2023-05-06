@@ -37,7 +37,7 @@ impl Serialize for Request {
         S: serde::Serializer,
     {
         // 3 is the number of fields in the struct.
-        let mut state = serializer.serialize_struct("Request", 9)?;
+        let mut state = serializer.serialize_struct("Request", 13)?;
 
         let hash = hex::decode(&self.info_hash)
             .map_err(|_| ser::Error::custom("failed to decode info_hash to hex"))?;
