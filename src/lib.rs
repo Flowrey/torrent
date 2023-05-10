@@ -1,5 +1,6 @@
 pub mod metainfo;
 pub mod tracker;
+pub mod error;
 
 #[cfg(test)]
 mod tests {
@@ -7,6 +8,8 @@ mod tests {
 
     use super::metainfo::{Info, Metainfo};
     use super::tracker::Request;
+    use base64::Engine;
+    use base64::engine::general_purpose;
     use reqwest;
 
     #[test]
@@ -15,6 +18,14 @@ mod tests {
             Info::new_single_file("e04a20f7b16636fc5889201e73ac8625", "debian.iso", 100),
             "http://localhost:8080",
         );
+    }
+
+    #[test]
+    fn build_metainfo_from_torrent() {
+        let b64_torrent = "ZDg6YW5ub3VuY2UzMDpodHRwOi8vbG9jYWxob3N0OjMwMDAvYW5ub3VuY2UxMDpjcmVhdGVkIGJ5MTM6bWt0b3JyZW50IDEuMTEzOmNyZWF0aW9uIGRhdGVpMTY4Mzc0NDk3N2U0OmluZm9kNjpsZW5ndGhpMTJlNDpuYW1lNDp0ZXN0MTI6cGllY2UgbGVuZ3RoaTI2MjE0NGU2OnBpZWNlczIwOvzPTixWdm/+2jpCJFIka+4vtk0WZWU=";
+        let bytes = general_purpose::STANDARD.decode(b64_torrent).unwrap();
+        let metainfo = Metainfo::try_from_bytes(&bytes).unwrap();
+        assert_eq!(metainfo.annouce(), "http://localhost:3000/announce")
     }
 
     #[test]

@@ -1,4 +1,11 @@
-#[derive(Clone)]
+use std::fs;
+
+use serde::Deserialize;
+use serde_bencode::de;
+
+use crate::error::Error;
+
+#[derive(Clone, Deserialize, Debug)]
 #[allow(dead_code)]
 pub struct File {
     length: u64,
@@ -16,11 +23,13 @@ impl File {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Deserialize, Debug)]
 #[allow(dead_code)]
 pub struct Info {
+    #[serde(rename = "piece length")]
     piece_length: u64,
-    pieces: String,
+    #[serde(with = "serde_bytes")]
+    pieces: Vec<u8>,
     private: Option<bool>,
 
     name: String,
@@ -44,7 +53,7 @@ impl Info {
     pub fn single_file_builder(pieces: &str, name: &str, length: u64) -> InfoBuilder {
         InfoBuilder {
             piece_length: 512,
-            pieces: pieces.to_string(),
+            pieces: pieces.as_bytes().to_vec(),
             private: None,
             name: name.to_string(),
             length: Some(length),
@@ -55,7 +64,7 @@ impl Info {
     pub fn multiple_file_builder(pieces: &str, name: &str, files: Vec<File>) -> InfoBuilder {
         InfoBuilder {
             piece_length: 512,
-            pieces: pieces.to_string(),
+            pieces: pieces.as_bytes().to_vec(),
             private: None,
             name: name.to_string(),
             length: None,
@@ -66,7 +75,7 @@ impl Info {
 
 pub struct InfoBuilder {
     piece_length: u64,
-    pieces: String,
+    pieces: Vec<u8>,
     private: Option<bool>,
 
     name: String,
@@ -101,27 +110,39 @@ impl InfoBuilder {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Deserialize, Debug)]
 #[allow(dead_code)]
 pub struct Metainfo {
     info: Info,
-    annouce: String,
+    announce: String,
+    #[serde(rename = "announce-list")]
     announce_list: Option<String>,
-    creation_date: Option<String>,
+    #[serde(rename = "creation date")]
+    creation_date: Option<u64>,
     comment: Option<String>,
+    #[serde(rename = "created by")]
     created_by: Option<String>,
     encoding: Option<String>,
 }
 
 impl Metainfo {
-    pub fn new(info: Info, annouce: &str) -> Metainfo {
-        Self::builder(info, annouce).build()
+    pub fn new(info: Info, announce: &str) -> Metainfo {
+        Self::builder(info, announce).build()
     }
 
-    pub fn builder(info: Info, annouce: &str) -> MetainfoBuilder {
+    pub fn try_from_bytes(bytes: &[u8]) -> Result<Metainfo, Error> {
+        de::from_bytes::<Metainfo>(&bytes).map_err(|e| Error::DeError(e))
+    }
+
+    pub fn try_from_torrent(path: &str) -> Result<Metainfo, Error> {
+        let bytes = fs::read(path)?;
+        Self::try_from_bytes(&bytes)
+    }
+
+    pub fn builder(info: Info, announce: &str) -> MetainfoBuilder {
         MetainfoBuilder {
             info,
-            annouce: annouce.to_string(),
+            announce: announce.to_string(),
             announce_list: None,
             creation_date: None,
             comment: None,
@@ -132,15 +153,15 @@ impl Metainfo {
 
     /// The announce URL of the tracker
     pub fn annouce(self) -> String {
-        self.annouce
+        self.announce
     }
 }
 
 pub struct MetainfoBuilder {
     info: Info,
-    annouce: String,
+    announce: String,
     announce_list: Option<String>,
-    creation_date: Option<String>,
+    creation_date: Option<u64>,
     comment: Option<String>,
     created_by: Option<String>,
     encoding: Option<String>,
@@ -152,8 +173,8 @@ impl MetainfoBuilder {
         self
     }
 
-    pub fn creation_date(&mut self, creation_date: &str) -> &mut Self {
-        self.creation_date = Some(creation_date.to_string());
+    pub fn creation_date(&mut self, creation_date: u64) -> &mut Self {
+        self.creation_date = Some(creation_date);
         self
     }
 
@@ -175,9 +196,9 @@ impl MetainfoBuilder {
     pub fn build(&mut self) -> Metainfo {
         Metainfo {
             info: self.info.clone(),
-            annouce: self.annouce.clone(),
+            announce: self.announce.clone(),
             announce_list: self.announce_list.clone(),
-            creation_date: self.creation_date.clone(),
+            creation_date: self.creation_date,
             comment: self.comment.clone(),
             created_by: self.created_by.clone(),
             encoding: self.encoding.clone(),
