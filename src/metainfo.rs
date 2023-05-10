@@ -131,7 +131,7 @@ impl Metainfo {
     }
 
     pub fn try_from_bytes(bytes: &[u8]) -> Result<Metainfo, Error> {
-        de::from_bytes::<Metainfo>(&bytes).map_err(|e| Error::DeError(e))
+        de::from_bytes::<Metainfo>(bytes).map_err(Error::DeError)
     }
 
     pub fn try_from_torrent(path: &str) -> Result<Metainfo, Error> {
