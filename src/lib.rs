@@ -1,6 +1,6 @@
+pub mod error;
 pub mod metainfo;
 pub mod tracker;
-pub mod error;
 
 #[cfg(test)]
 mod tests {
@@ -8,8 +8,8 @@ mod tests {
 
     use super::metainfo::{Info, Metainfo};
     use super::tracker::Request;
-    use base64::Engine;
     use base64::engine::general_purpose;
+    use base64::Engine;
     use reqwest;
 
     #[test]
