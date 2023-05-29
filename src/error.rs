@@ -1,3 +1,4 @@
+use std::array::TryFromSliceError;
 use std::fmt::{self, Display};
 use std::{self, io};
 
@@ -8,6 +9,7 @@ pub enum Error {
     IOError(io::Error),
     DeError(serde_bencode::error::Error),
     Message(String),
+    BufferSier(TryFromSliceError)
 }
 
 impl From<io::Error> for Error {
@@ -22,12 +24,19 @@ impl From<serde_bencode::error::Error> for Error {
     }
 }
 
+impl From<TryFromSliceError> for Error {
+    fn from(error: TryFromSliceError) -> Self {
+        Self::BufferSier(error)
+    }
+}
+
 impl Display for Error {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Error::Message(msg) => formatter.write_str(msg),
             Error::IOError(e) => formatter.write_str(&e.to_string()),
             Error::DeError(e) => formatter.write_str(&e.to_string()),
+            Error::BufferSier(e) => formatter.write_str(&e.to_string())
         }
     }
 }

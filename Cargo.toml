@@ -15,3 +15,8 @@ hex = "0.4.3"
 [dev-dependencies]
 base64 = "0.21.0"
 hex-literal = "0.4.1"
+tokio = { version = "1.28.2", features = ["full"] }
+
+[[example]]
+name = "client"
+path = "example/client.rs"

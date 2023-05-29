@@ -1,3 +1,5 @@
+use crate::error::Result;
+
 const HANDSHAKE_LEN: usize = 68;
 
 pub struct Handshake([u8; HANDSHAKE_LEN]);
@@ -11,6 +13,11 @@ impl Handshake {
         buff[28..48].copy_from_slice(&info_hash);
         buff[48..68].copy_from_slice(peer_id.as_bytes());
         Handshake(buff)
+    }
+
+    pub fn from_bytes(buff: &[u8]) -> Result<Handshake>{
+        let buff : [u8; HANDSHAKE_LEN] = buff.try_into()?;
+        Ok(Handshake(buff))
     }
 
     pub fn pstrlen(&self) -> u8 {
