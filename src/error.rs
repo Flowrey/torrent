@@ -9,7 +9,7 @@ pub enum Error {
     IOError(io::Error),
     DeError(serde_bencode::error::Error),
     Message(String),
-    BufferSier(TryFromSliceError)
+    BufferSier(TryFromSliceError),
 }
 
 impl From<io::Error> for Error {
@@ -36,7 +36,7 @@ impl Display for Error {
             Error::Message(msg) => formatter.write_str(msg),
             Error::IOError(e) => formatter.write_str(&e.to_string()),
             Error::DeError(e) => formatter.write_str(&e.to_string()),
-            Error::BufferSier(e) => formatter.write_str(&e.to_string())
+            Error::BufferSier(e) => formatter.write_str(&e.to_string()),
         }
     }
 }

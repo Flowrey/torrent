@@ -1,11 +1,12 @@
 use std::fs;
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_bencode::de;
+use sha1::{Digest, Sha1};
 
 use crate::error::Error;
 
-#[derive(Clone, Deserialize, Debug)]
+#[derive(Clone, Deserialize, Serialize, Debug)]
 #[allow(dead_code)]
 pub struct File {
     length: u64,
@@ -23,7 +24,7 @@ impl File {
     }
 }
 
-#[derive(Clone, Deserialize, Debug)]
+#[derive(Clone, Deserialize, Serialize, Debug)]
 #[allow(dead_code)]
 pub struct Info {
     #[serde(rename = "piece length")]
@@ -70,6 +71,17 @@ impl Info {
             length: None,
             files: Some(files),
         }
+    }
+
+    pub fn pieces(self) -> Vec<u8> {
+        self.pieces
+    }
+
+    pub fn info_hash(&self) -> Vec<u8>{
+        let mut hasher = Sha1::new();
+        let bencoded_info = serde_bencode::to_bytes(&self).expect("Info shoud be serializable");
+        hasher.update(bencoded_info);
+        hasher.finalize().to_vec()
     }
 }
 
@@ -154,6 +166,10 @@ impl Metainfo {
     /// The announce URL of the tracker
     pub fn annouce(self) -> String {
         self.announce
+    }
+
+    pub fn info(self) -> Info {
+        self.info
     }
 }
 

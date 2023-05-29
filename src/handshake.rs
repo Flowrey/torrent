@@ -15,8 +15,8 @@ impl Handshake {
         Handshake(buff)
     }
 
-    pub fn from_bytes(buff: &[u8]) -> Result<Handshake>{
-        let buff : [u8; HANDSHAKE_LEN] = buff.try_into()?;
+    pub fn from_bytes(buff: &[u8]) -> Result<Handshake> {
+        let buff: [u8; HANDSHAKE_LEN] = buff.try_into()?;
         Ok(Handshake(buff))
     }
 

@@ -1,12 +1,14 @@
+use serde::{Serialize, Deserialize};
+
 #[allow(dead_code)]
-#[derive(Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum PeerModel {
     Dictionary(Vec<Peer>),
     String(String),
 }
 
 #[allow(dead_code)]
-#[derive(Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Peer {
     peer_id: String,
     ip: String,
@@ -15,6 +17,7 @@ pub struct Peer {
 
 /// Tracker response.
 #[allow(dead_code)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Response {
     failure_reason: Option<String>,
     warning_message: Option<String>,
