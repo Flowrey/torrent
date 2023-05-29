@@ -1,4 +1,5 @@
 pub mod error;
+pub mod handshake;
 pub mod metainfo;
 pub mod tracker;
 
