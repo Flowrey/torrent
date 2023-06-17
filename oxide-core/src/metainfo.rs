@@ -19,6 +19,10 @@ pub struct File {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[allow(dead_code)]
 pub struct Info {
+    /// List of file in multi-file case.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    files: Option<Vec<File>>,
+
     /// If length is present then the download represents a single file.
     /// In the single file case, length maps to the length of the file in bytes.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -36,10 +40,6 @@ pub struct Info {
     /// It is to be subdivided into strings of length 20, each of which is the SHA1 hash of the piece at the corresponding index.
     #[serde(with = "serde_bytes")]
     pieces: Vec<u8>,
-
-    /// List of file in multi-file case.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    files: Option<Vec<File>>,
 }
 
 impl Info {
