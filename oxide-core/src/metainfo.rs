@@ -1,6 +1,7 @@
 use oxide_bencode;
 use reqwest;
 use serde::{Deserialize, Serialize};
+use sha1::{Digest, Sha1};
 
 use crate::error::Error;
 
@@ -18,6 +19,11 @@ pub struct File {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[allow(dead_code)]
 pub struct Info {
+    /// If length is present then the download represents a single file.
+    /// In the single file case, length maps to the length of the file in bytes.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    length: Option<u64>,
+
     /// In the single file case, the name key is the name of a file,
     /// in the muliple file case, it's the name of a directory.
     name: String,
@@ -31,17 +37,28 @@ pub struct Info {
     #[serde(with = "serde_bytes")]
     pieces: Vec<u8>,
 
-    /// If length is present then the download represents a single file.
-    /// In the single file case, length maps to the length of the file in bytes.
-    length: Option<u64>,
-
     /// List of file in multi-file case.
+    #[serde(skip_serializing_if = "Option::is_none")]
     files: Option<Vec<File>>,
 }
 
 impl Info {
-    pub fn name(self) -> String {
-        self.name
+    pub fn name(&self) -> String {
+        self.name.clone()
+    }
+
+    // Note that this is a substring of the metainfo file.
+    // The info-hash must be the hash of the encoded form as found in the .torrent file,
+    // which is identical to bdecoding the metainfo file,
+    // extracting the info dictionary and encoding it if and only if the bdecoder fully validated the input
+    // (e.g. key ordering, absence of leading zeros). Conversely
+    // that means clients must either reject invalid metainfo files or extract the substring directly.
+    // They must not perform a decode-encode roundtrip on invalid data.
+    pub fn hash(self) -> [u8; 20] {
+        let mut hasher = Sha1::new();
+        let data = oxide_bencode::to_bytes(&self).unwrap();
+        hasher.update(data);
+        hasher.finalize().into()
     }
 }
 

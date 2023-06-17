@@ -3,16 +3,14 @@ use serde::{ser, Serialize};
 use crate::error::{Error, Result};
 
 pub struct Serializer {
-    output: String,
+    output: Vec<u8>,
 }
 
-pub fn to_string<T>(value: &T) -> Result<String>
+pub fn to_bytes<T>(value: &T) -> Result<Vec<u8>>
 where
     T: Serialize,
 {
-    let mut serializer = Serializer {
-        output: String::new(),
-    };
+    let mut serializer = Serializer { output: Vec::new() };
     value.serialize(&mut serializer)?;
     Ok(serializer.output)
 }
@@ -31,7 +29,11 @@ impl<'a> ser::Serializer for &'a mut Serializer {
     type SerializeStructVariant = Self;
 
     fn serialize_bool(self, v: bool) -> Result<()> {
-        self.output += if v { "i0e" } else { "i1e" };
+        if v {
+            self.output.append(&mut b"i0e".to_vec())
+        } else {
+            self.output.append(&mut b"i1e".to_vec())
+        }
         Ok(())
     }
 
@@ -48,9 +50,9 @@ impl<'a> ser::Serializer for &'a mut Serializer {
     }
 
     fn serialize_i64(self, v: i64) -> Result<()> {
-        self.output += "i";
-        self.output += &v.to_string();
-        self.output += "e";
+        self.output.push(b'i');
+        self.output.append(&mut v.to_string().into_bytes());
+        self.output.push(b'e');
         Ok(())
     }
 
@@ -67,9 +69,9 @@ impl<'a> ser::Serializer for &'a mut Serializer {
     }
 
     fn serialize_u64(self, v: u64) -> Result<()> {
-        self.output += "i";
-        self.output += &v.to_string();
-        self.output += "e";
+        self.output.push(b'i');
+        self.output.append(&mut v.to_string().into_bytes());
+        self.output.push(b'e');
         Ok(())
     }
 
@@ -78,9 +80,9 @@ impl<'a> ser::Serializer for &'a mut Serializer {
     }
 
     fn serialize_f64(self, v: f64) -> Result<()> {
-        self.output += "i";
-        self.output += &v.to_string();
-        self.output += "e";
+        self.output.push(b'i');
+        self.output.append(&mut v.to_string().into_bytes());
+        self.output.push(b'e');
         Ok(())
     }
 
@@ -89,19 +91,17 @@ impl<'a> ser::Serializer for &'a mut Serializer {
     }
 
     fn serialize_str(self, v: &str) -> Result<()> {
-        self.output += &v.len().to_string();
-        self.output += ":";
-        self.output += v;
+        self.output.append(&mut v.len().to_string().into_bytes());
+        self.output.push(b':');
+        self.output.append(&mut v.to_string().into_bytes());
         Ok(())
     }
 
     fn serialize_bytes(self, v: &[u8]) -> Result<()> {
-        use serde::ser::SerializeSeq;
-        let mut seq = self.serialize_seq(Some(v.len()))?;
-        for byte in v {
-            seq.serialize_element(byte)?;
-        }
-        seq.end()
+        self.output.append(&mut v.len().to_string().into_bytes());
+        self.output.push(b':');
+        self.output.append(&mut v.to_vec());
+        Ok(())
     }
 
     fn serialize_none(self) -> Result<()> {
@@ -153,7 +153,7 @@ impl<'a> ser::Serializer for &'a mut Serializer {
     }
 
     fn serialize_seq(self, _len: Option<usize>) -> Result<Self::SerializeSeq> {
-        self.output += "l";
+        self.output.push(b'l');
         Ok(self)
     }
 
@@ -180,7 +180,7 @@ impl<'a> ser::Serializer for &'a mut Serializer {
     }
 
     fn serialize_map(self, _len: Option<usize>) -> Result<Self::SerializeMap> {
-        self.output += "d";
+        self.output.push(b'd');
         Ok(self)
     }
 
@@ -211,7 +211,7 @@ impl<'a> ser::SerializeSeq for &'a mut Serializer {
     }
 
     fn end(self) -> Result<()> {
-        self.output += "e";
+        self.output.push(b'e');
         Ok(())
     }
 }
@@ -228,7 +228,7 @@ impl<'a> ser::SerializeTuple for &'a mut Serializer {
     }
 
     fn end(self) -> Result<()> {
-        self.output += "e";
+        self.output.push(b'e');
         Ok(())
     }
 }
@@ -245,7 +245,7 @@ impl<'a> ser::SerializeTupleStruct for &'a mut Serializer {
     }
 
     fn end(self) -> Result<()> {
-        self.output += "e";
+        self.output.push(b'e');
         Ok(())
     }
 }
@@ -262,7 +262,7 @@ impl<'a> ser::SerializeTupleVariant for &'a mut Serializer {
     }
 
     fn end(self) -> Result<()> {
-        self.output += "ee";
+        self.output.append(&mut b"ee".to_vec());
         Ok(())
     }
 }
@@ -286,7 +286,7 @@ impl<'a> ser::SerializeMap for &'a mut Serializer {
     }
 
     fn end(self) -> Result<()> {
-        self.output += "e";
+        self.output.push(b'e');
         Ok(())
     }
 }
@@ -304,7 +304,7 @@ impl<'a> ser::SerializeStruct for &'a mut Serializer {
     }
 
     fn end(self) -> Result<()> {
-        self.output += "e";
+        self.output.push(b'e');
         Ok(())
     }
 }
@@ -322,7 +322,7 @@ impl<'a> ser::SerializeStructVariant for &'a mut Serializer {
     }
 
     fn end(self) -> Result<()> {
-        self.output += "ee";
+        self.output.append(&mut b"ee".to_vec());
         Ok(())
     }
 }
@@ -339,6 +339,6 @@ fn test_struct() {
         int: 1,
         seq: vec!["a", "b"],
     };
-    let expected = r#"d3:inti1e3:seql1:a1:bee"#;
-    assert_eq!(to_string(&test).unwrap(), expected);
+    let expected = br#"d3:inti1e3:seql1:a1:bee"#;
+    assert_eq!(to_bytes(&test).unwrap(), expected);
 }

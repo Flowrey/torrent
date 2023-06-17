@@ -58,7 +58,7 @@ impl Display for Error {
             Error::Syntax => formatter.write_str("syntax error"),
             Error::ExpectedBoolean => formatter.write_str("boolean was expected"),
             Error::ExpectedInteger => todo!(),
-            Error::ExpectedString => todo!(),
+            Error::ExpectedString => formatter.write_str("string was expected"),
             Error::ExpectedNull => todo!(),
             Error::ExpectedArray => todo!(),
             Error::ExpectedArrayComma => todo!(),
