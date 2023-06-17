@@ -49,6 +49,14 @@ impl Info {
         self.name.clone()
     }
 
+    pub fn length(&self) -> Option<u64> {
+        self.length
+    }
+
+    pub fn piece_length(&self) -> u64 {
+        self.piece_length
+    }
+
     // Note that this is a substring of the metainfo file.
     // The info-hash must be the hash of the encoded form as found in the .torrent file,
     // which is identical to bdecoding the metainfo file,

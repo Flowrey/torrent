@@ -19,6 +19,8 @@ mod tests {
             "http://bttracker.debian.org:6969/announce"
         );
         assert_eq!(info.name(), "debian-12.0.0-amd64-netinst.iso");
+        assert_eq!(info.length(), Some(773849088));
+        assert_eq!(info.piece_length(), 262144);
         assert_eq!(
             info.hash()[..],
             hex!("b851474b74f65cd19f981c723590e3e520242b97")
