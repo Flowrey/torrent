@@ -64,9 +64,9 @@ impl Info {
     // (e.g. key ordering, absence of leading zeros). Conversely
     // that means clients must either reject invalid metainfo files or extract the substring directly.
     // They must not perform a decode-encode roundtrip on invalid data.
-    pub fn hash(self) -> [u8; 20] {
+    pub fn hash(&self) -> [u8; 20] {
         let mut hasher = Sha1::new();
-        let data = oxide_bencode::to_bytes(&self).unwrap();
+        let data = oxide_bencode::to_bytes(self).unwrap();
         hasher.update(data);
         hasher.finalize().into()
     }
