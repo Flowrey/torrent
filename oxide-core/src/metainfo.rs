@@ -18,6 +18,8 @@ pub struct File {
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[allow(dead_code)]
+// Order matters for getting SHA1 hash of the Info Struct
+// TODO: find a way to preserve order from ser to de
 pub struct Info {
     /// List of file in multi-file case.
     #[serde(skip_serializing_if = "Option::is_none")]
