@@ -82,8 +82,8 @@ pub struct MetaInfo {
 }
 
 impl MetaInfo {
-    pub fn from_url(url: &str) -> Result<MetaInfo, Error> {
-        let body = reqwest::blocking::get(url)?.bytes()?;
+    pub async fn from_url(url: &str) -> Result<MetaInfo, Error> {
+        let body = reqwest::get(url).await?.bytes().await?;
         Ok(oxide_bencode::from_bytes(&body)?)
     }
 
